@@ -1,10 +1,10 @@
 # Timepeek extension
 
-Quickly view a Unix timestamp in a human-readable format.
+This is a browser addon (currently focused on Firefox) that will display a formatted date if the
+user selects a Unix timestamp in a web page. We format the date in the provided format and for the
+provided timezone(s).
 
 ## Firefox Addon
-
-https://addons.mozilla.org/en-US/firefox/addon/timepeek/
 
 ### Development for Firefox
 

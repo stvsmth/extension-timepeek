@@ -8,8 +8,6 @@
     "version": "1.0.0",
     "permissions": [
         "activeTab",
-        "clipboardWrite",
-        "contextMenus",
         "http://*/",
         "https://*/",
         "storage"
@@ -21,9 +19,6 @@
             ],
             "js": [
                 "vendor/browser-polyfill.min.js",
-                "vendor/dayjs.js",
-                "vendor/utc.js",
-                "vendor/timezone.js",
                 "scripts/content.js"
             ],
             "css": [

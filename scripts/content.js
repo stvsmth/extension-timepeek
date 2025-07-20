@@ -1,5 +1,23 @@
-dayjs.extend(window.dayjs_plugin_utc);
-dayjs.extend(window.dayjs_plugin_timezone);
+async function getFormattedDate(text) {
+
+  // Regex out the spaces.
+  text = text.replace(/[ ]/g, '');
+
+  // Check if you selected a number.
+  if (!/^[0-9]{1,}([\.]?[0-9]{1,})?$/.test(text)) {
+    return { textContent: null, fetchedIn: null };
+  }
+
+  try {
+    const response = await browser.runtime.sendMessage({
+      action: 'formatDate',
+      text: text
+    });
+    return response;
+  } catch (e) {
+    return { textContent: e, fetchedIn: 'seconds' };
+  }
+}
 
 function getSelectedText() {
   // Try window.getSelection. If not found use document.selection.
@@ -22,9 +40,7 @@ function getSelectedText() {
     return document.selection.createRange().text.trim();
   }
 
-  // TODO: Not sure this is an error
-  // If neither was found, console error.
-  console.error('Cannot get the selected text.');
+  // If no selection, return empty string.
   return '';
 }
 
@@ -40,7 +56,6 @@ async function handleEsc(e) {
 
 async function handleEvent(e) {
   // Get the text and the formatted date.
-  console.log('Mouse up event detected.');
   let text = getSelectedText();
 
   // Fetch the date(s).
@@ -76,8 +91,9 @@ async function handleEvent(e) {
   // Create the actual timestamp.
   let p = document.createElement('p');
   p.id = 'timepeek-date';
+
   // Display multiple dates on separate lines if needed.
-  p.innerText = Array.isArray(textContent)
+  p.textContent = Array.isArray(textContent)
     ? textContent.join('\n')
     : textContent;
 
@@ -87,8 +103,6 @@ async function handleEvent(e) {
 }
 
 (() => {
-  // loadDefaultSettings();
-
   // Add an event listener on mouseup to handle the CTRL click conversion.
   document.addEventListener('mouseup', handleEvent, false);
   document.addEventListener('keydown', handleEsc, false);
