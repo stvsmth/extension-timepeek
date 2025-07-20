@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <title>Timepeek</title>
+        <link
+            href="https://fonts.googleapis.com/icon?family=Material+Icons"
+            rel="stylesheet"
+        />
+        <link rel="stylesheet" href="timepeek.css" />
+    </head>
+    <body>
+        <script src="../vendor/browser-polyfill.min.js"></script>
+        <script src="../vendor/dayjs.js"></script>
+        <script src="../vendor/utc.js"></script>
+        <script src="../vendor/timezone.js"></script>
+        <script src="timepeek.js"></script>
+        <div class="container">
+            <div class="border"></div>
+            <div class="loading">
+                <h1 class="center">LOADING...</h1>
+            </div>
+            <div class="content dn">
+                <div class="title center">
+                    <img src="../icons/timepeek-1024.png" alt="Logo" />
+                </div>
+
+                <h2 class="center icon">Timepeek</h2>
+
+                <div class="divider w100"></div>
+
+                <div class="settings mt20">
+                      <div class="preview w100">
+                          <label for="timepeek-preview">Preview</label>
+                          <input
+                              type="text"
+                               id="timepeek-preview"
+                               readonly
+                          />
+                      </div>
+                      <div class="format w100">
+                          <label for="timepeek-format">Format</label>
+                          <input
+                              type="text"
+                              id="timepeek-format"
+                          />
+                          <!-- <a -->
+                          <!--     target="_blank" -->
+                          <!--     href="https://day.js.org/docs/en/display/format" -->
+                          <!-- > -->
+                          <!--    Day.js Format Docs -->
+                          <!-- </a> -->
+                      </div>
+                      <div class="timezones w100">
+                          <label for="timepeek-timezones">Timezones</label>
+                          <input
+                              type="text"
+                              id="timepeek-timezones"
+                              list="timezones"
+                          />
+                          <datalist id="timezones"></datalist>
+                      </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

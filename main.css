@@ -1,0 +1,26 @@
+#timepeek-base {
+    width: auto;
+    position: fixed;
+    z-index: 99999;
+    background: black;
+    min-height: 35px;
+    padding: 5px 10px;
+    white-space: pre-wrap;
+}
+
+#timepeek-date {
+    margin: 10px 10px 0 10px;
+    color: white;
+    padding: 0;
+    font-size: 14px;
+    font-family: monospace;
+}
+
+#timepeek-icon {
+    color: gray;
+    position: absolute;
+    left: 10px;
+    top: 28px;
+    font-size: 20px;
+    cursor: pointer;
+}

@@ -1,0 +1,54 @@
+{
+    "manifest_version": 2,
+    "name": "Timepeek",
+    "short_name": "Timepeek",
+    "description": "Hover over any Unix timestamp to display a human-readable date and time.",
+    "homepage_url": "https://github.com/stvsmth/extension-timepeek",
+    "author": "stvsmth",
+    "version": "1.0.0",
+    "permissions": [
+        "activeTab",
+        "clipboardWrite",
+        "contextMenus",
+        "http://*/",
+        "https://*/",
+        "storage"
+    ],
+    "content_scripts": [
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "vendor/browser-polyfill.min.js",
+                "vendor/dayjs.js",
+                "vendor/utc.js",
+                "vendor/timezone.js",
+                "scripts/content.js"
+            ],
+            "css": [
+                "main.css"
+            ],
+            "all_frames": true
+        }
+    ],
+    "background": {
+        "scripts": [
+            "vendor/browser-polyfill.min.js",
+            "vendor/dayjs.js",
+            "vendor/utc.js",
+            "vendor/timezone.js",
+            "scripts/background.js"
+        ]
+    },
+    "browser_action": {
+        "default_icon": "icons/timepeek-48.png",
+        "default_popup": "popup/timepeek.html",
+        "default_title": "Timepeek"
+    },
+    "icons": {
+        "16": "icons/timepeek-16.png",
+        "48": "icons/timepeek-48.png",
+        "1024": "icons/timepeek-1024.png"
+    }
+}

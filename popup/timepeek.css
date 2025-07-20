@@ -1,0 +1,157 @@
+* {
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+    font-size: 12px;
+    color: white;
+}
+
+html {
+    background: #3042ff;
+    overflow: hidden;
+    min-width: 195px;
+}
+
+/* Firefox */
+@supports (height: -moz-available) {
+    html {
+        height: 100%;
+    }
+
+    .content {
+        width: 475px !important;
+    }
+}
+
+/* Chrome */
+@supports not (height: -moz-available) {
+}
+
+.dn {
+    display: none;
+}
+
+.mb10 {
+    margin-bottom: 10px !important;
+}
+
+.mt20 {
+    margin-top: 20px !important;
+}
+
+.w100 {
+    width: 100%;
+}
+
+.title {
+    margin-bottom: 8px !important;
+}
+
+.title img {
+    background: white;
+    border-radius: 25px;
+    height: 100px;
+    border: 2px solid black;
+}
+
+.border {
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    border: 3px solid black;
+    z-index: -1;
+}
+
+a,
+a:any-link {
+    font-size: 8px;
+    color: white !important;
+    text-decoration: underline !important;
+}
+
+.icon {
+    display: flex;
+    align-items: center;
+    font-size: 2em;
+    text-transform: uppercase;
+}
+
+.container {
+    width: 500px;
+}
+
+.content {
+    width: 480px;
+    padding: 0 10px 10px;
+}
+
+.content,
+.loading {
+    margin: 10px;
+    color: black;
+}
+
+.center {
+    margin: auto;
+    text-align: center;
+    text-align: -webkit-center;
+    text-align: -moz-center;
+    text-align: -o-center;
+    justify-content: center;
+}
+
+.ml10 {
+    margin-left: 10px;
+}
+
+.settings {
+    display: flex;
+    flex-direction: column;
+}
+
+input[type='text'] {
+    background: none;
+    border: none;
+    color: #3042ff;
+    background-color: white;
+    width: 97%;
+}
+
+.preview input {
+    background-color: #3042ff;
+    color: white;
+}
+
+.divider {
+    margin: 10px 0;
+    width: 97%;
+    background: white;
+    height: 1px;
+}
+
+label {
+    color: white;
+    margin-bottom: 3px;
+    font-size: 11px;
+}
+
+.format,
+.preview,
+.timezones {
+    display: flex;
+    font-weight: bold;
+    flex-direction: column;
+    justify-content: center;
+    padding: 10px;
+    width: 97%;
+}
+
+.flex {
+    display: flex;
+}
