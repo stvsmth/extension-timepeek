@@ -41,6 +41,11 @@
         "default_popup": "popup/timepeek.html",
         "default_title": "Timepeek"
     },
+    "browser_specific_settings": {
+        "gecko": {
+            "id": "{ed14e330-6c75-483f-8ddc-72987c4a5162}"
+        }
+    },
     "icons": {
         "16": "icons/timepeek-16.png",
         "48": "icons/timepeek-48.png",
