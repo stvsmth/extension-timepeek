@@ -11,7 +11,8 @@ async function handleMessage(message) {
 
     try {
       const dateStr = timezones.map(tz => {
-        return dayjs.unix(timestamp).tz(tz).format(format);
+        const location = tz.split('/').pop().replace(/_/g, ' ');
+        return dayjs.unix(timestamp).tz(tz).format(format) + ' - ' + location;
       }).join('\n');
       return Promise.resolve({ textContent: dateStr, fetchedIn: 'seconds' });
     } catch (e) {
