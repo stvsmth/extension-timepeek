@@ -46,12 +46,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const updatePreview = () => {
     const format = formatInput.value || DEFAULT_FORMAT;
     const tz = currentTzs[0]; // defaults to system TZ if undefined
-    let formattedDate = dayjs().tz(tz).format(format);
-    if (tz) {
-      const location = tz.split('/').pop().replace(/_/g, ' ');
-      formattedDate += ' ' + location;
-    }
-    previewFormat.value = formattedDate;
+    previewFormat.value = getFormattedString(dayjs(), tz, format);
   };
 
   const createTag = (timezone) => {
