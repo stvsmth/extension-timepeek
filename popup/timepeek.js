@@ -3,6 +3,7 @@ dayjs.extend(window.dayjs_plugin_timezone);
 
 const DEFAULT_FORMAT = 'ddd MMM DD YYYY HH:mm:ss ZZ'
 const DEFAULT_TIMEZONES = ['America/New_York'];
+const DEFAULT_INCLUDE_REGION = true;
 
 document.addEventListener('DOMContentLoaded', async () => {
   // Display version from manifest
@@ -17,6 +18,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   let timezones = await browser.storage.local.get('timezones');
   if (!Object.keys(timezones).length) {
     await browser.storage.local.set({ timezones: DEFAULT_TIMEZONES });
+  }
+  let includeRegionSetting = await browser.storage.local.get('includeRegion');
+  if (!Object.keys(includeRegionSetting).length) {
+    await browser.storage.local.set({ includeRegion: DEFAULT_INCLUDE_REGION });
   }
 
   // Load the browser storage.
@@ -40,6 +45,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     formatInput.value = settings.format;
   }
 
+  // Include region checkbox
+  const includeRegionCheckbox = document.getElementById('timepeek-include-region');
+  const includeRegion = settings.hasOwnProperty('includeRegion') ? settings.includeRegion : DEFAULT_INCLUDE_REGION;
+  includeRegionCheckbox.checked = includeRegion;
+
   // Timezones management
   const timezonesContainer = document.getElementById('timezones-container');
   const timezonesInput = document.getElementById('timepeek-timezones-input');
@@ -49,7 +59,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const updatePreview = () => {
     const format = formatInput.value || DEFAULT_FORMAT;
     const tz = currentTzs[0]; // defaults to system TZ if undefined
-    previewFormat.value = getFormattedString(dayjs(), tz, format);
+    previewFormat.value = getFormattedString(dayjs(), tz, format, includeRegionCheckbox.checked);
   };
 
   const createTag = (timezone) => {
@@ -86,6 +96,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Set the event listener for the format input
   formatInput.addEventListener('input', async () => {
     await browser.storage.local.set({ format: formatInput.value || null });
+    updatePreview();
+  });
+
+  // Set the event listener for the include region checkbox
+  includeRegionCheckbox.addEventListener('change', async () => {
+    await browser.storage.local.set({ includeRegion: includeRegionCheckbox.checked });
     updatePreview();
   });
 
