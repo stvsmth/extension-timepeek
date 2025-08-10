@@ -1,8 +1,11 @@
 # Timepeek extension
 
-This is a browser addon (currently focused on Firefox) that will display a formatted date if the
-user selects a Unix timestamp in a web page. We format the date in the provided format and for the
-provided timezone(s).
+## Overview
+
+Timepeek is a browser extension (currently focused on Firefox) that will display a formatted date if the
+user selects a Unix timestamp in a web page. If the selected text is all digits, we treat that text
+as a timestamp and convert it into a human readable data. The user can control how that date is
+formatted as well as what timezone(s) to display.
 
 ## Firefox Addon
 
