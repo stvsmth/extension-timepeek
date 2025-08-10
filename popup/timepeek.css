@@ -182,6 +182,14 @@ label {
     font-size: 11px;
 }
 
+#version {
+    font-size: 0.4em;
+    margin-left: 1em;
+    /* align to the bottom of the flex container header */
+    align-self: flex-end;
+    padding-bottom: 2px;
+}
+
 .remove-tag {
     margin-left: 5px;
     cursor: pointer;

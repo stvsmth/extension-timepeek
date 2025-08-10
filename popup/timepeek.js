@@ -5,6 +5,9 @@ const DEFAULT_FORMAT = 'ddd MMM DD YYYY HH:mm:ss ZZ'
 const DEFAULT_TIMEZONES = ['America/New_York'];
 
 document.addEventListener('DOMContentLoaded', async () => {
+  // Display version from manifest
+  const manifest = browser.runtime.getManifest();
+  document.getElementById('version').textContent = 'v' + manifest.version;
 
   // Set default settings if they do not exist.
   let format = await browser.storage.local.get('format');
