@@ -44,38 +44,12 @@ function getSelectedText() {
   return '';
 }
 
-async function handleEsc(e) {
-  // If we get an escape key and the main window is up, close it.
-  if (e.key === 'Escape') {
-    let baseDiv = document.getElementById('timepeek-base');
-    if (baseDiv) {
-      baseDiv.remove()
-    };
-  }
-}
-
 async function handleEvent(e) {
   // Get the text and the formatted date.
   let text = getSelectedText();
 
   // Fetch the date(s).
   let { textContent, fetchedIn } = await getFormattedDate(text);
-
-  // Get the base div.
-  let baseDiv = document.getElementById('timepeek-base');
-
-  // If the base div exists, do not allow more conversions.
-  if (baseDiv) {
-    // Check if target was not the base or the date and if neither, remove the base div.
-    if (
-      e.target.id !== 'timepeek-base' &&
-      e.target.id !== 'timepeek-date'
-    ) {
-      baseDiv.remove();
-    }
-
-    return;
-  }
 
   // If no CTRL key, no text, or no converted textContent/fetchedIn, return.
   if (!e.ctrlKey || !text || !textContent || !fetchedIn) return;
@@ -84,13 +58,22 @@ async function handleEvent(e) {
   let div = document.createElement('div');
 
   // Set the ID and the top/left style based on the mouse position.
-  div.id = 'timepeek-base';
+  div.className = 'timepeek-base';
   div.style.left = `${e.clientX}px`;
   div.style.top = `${e.clientY + 30}px`;
 
+  // Create a close icon.
+  let close = document.createElement('span');
+  close.className = 'timepeek-icon';
+  close.textContent = '×';
+  close.title = 'Close';
+  close.addEventListener('click', () => {
+    div.remove();
+  });
+
   // Create the actual timestamp.
   let p = document.createElement('p');
-  p.id = 'timepeek-date';
+  p.className = 'timepeek-date';
 
   // Display multiple dates on separate lines if needed.
   p.textContent = Array.isArray(textContent)
@@ -98,6 +81,7 @@ async function handleEvent(e) {
     : textContent;
 
   // Append elements.
+  div.appendChild(close);
   div.appendChild(p);
   document.body.appendChild(div);
 }
@@ -105,5 +89,4 @@ async function handleEvent(e) {
 (() => {
   // Add an event listener on mouseup to handle the CTRL click conversion.
   document.addEventListener('mouseup', handleEvent, false);
-  document.addEventListener('keydown', handleEsc, false);
 })();

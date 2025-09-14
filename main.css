@@ -1,4 +1,4 @@
-#timepeek-base {
+.timepeek-base {
     width: auto;
     position: fixed;
     z-index: 99999;
@@ -8,7 +8,7 @@
     white-space: pre-wrap;
 }
 
-#timepeek-date {
+.timepeek-date {
     margin: 10px 10px 0 10px;
     color: white;
     padding: 0;
@@ -16,11 +16,11 @@
     font-family: monospace;
 }
 
-#timepeek-icon {
+.timepeek-icon {
     color: gray;
     position: absolute;
-    left: 10px;
-    top: 28px;
+    right: 6px;
+    top: 4px;
     font-size: 20px;
     cursor: pointer;
 }
