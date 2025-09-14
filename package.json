@@ -1,0 +1,14 @@
+{
+  "name": "extension-timepeek",
+  "private": true,
+  "version": "1.6.0",
+  "scripts": {
+    "build:firefox": "node scripts/gen-manifest.mjs firefox",
+    "build:chrome": "node scripts/gen-manifest.mjs chrome && rollup -c",
+    "dev:firefox": "web-ext run -s dist/firefox"
+  },
+  "devDependencies": {
+    "rollup": "^4.22.0"
+  }
+}
+

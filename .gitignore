@@ -1,4 +1,7 @@
-web-ext-artifacts/
-.web-ext-*
 .amo*
+.web-ext-*
 *.sh
+
+dist/
+node_modules/
+web-ext-artifacts/

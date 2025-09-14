@@ -1,0 +1,51 @@
+name: Build Extensions
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build Firefox (MV2)
+        run: npm run build:firefox
+
+      - name: Build Chrome (MV3)
+        run: npm run build:chrome
+
+      - name: Package artifacts
+        run: |
+          mkdir -p artifacts
+          # Zip Chrome unpacked folder for convenience
+          (cd dist && zip -r ../artifacts/timepeek-chrome-unpacked.zip chrome)
+          # Use web-ext to build a distributable zip for Firefox
+          npx --yes web-ext build -s dist/firefox -a artifacts
+
+      - name: Upload dist folders
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-folders
+          path: |
+            dist/chrome
+            dist/firefox
+
+      - name: Upload packaged zips
+        uses: actions/upload-artifact@v4
+        with:
+          name: packaged-zips
+          path: artifacts
+

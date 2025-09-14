@@ -1,17 +1,22 @@
-async function getFormattedDate(text) {
+const TIMESTAMP_REGEX = /^[0-9]{1,}(\.?[0-9]{1,})?$/;
+let lastTimestampSelection = { text: '', updatedAt: 0 };
 
-  // Regex out the spaces.
-  text = text.replace(/[ ]/g, '');
+function normalizeTimestamp(text = '') {
+  return text.replace(/\s+/g, '');
+}
+
+async function getFormattedDate(text) {
+  const normalized = normalizeTimestamp(text);
 
   // Check if you selected a number.
-  if (!/^[0-9]{1,}([\.]?[0-9]{1,})?$/.test(text)) {
+  if (!TIMESTAMP_REGEX.test(normalized)) {
     return { textContent: null, fetchedIn: null };
   }
 
   try {
     const response = await browser.runtime.sendMessage({
       action: 'formatDate',
-      text: text
+      text: normalized
     });
     return response;
   } catch (e) {
@@ -52,14 +57,28 @@ function handleEsc(e) {
 }
 
 async function handleEvent(e) {
+  // Support Ctrl on Windows/Linux and Command on macOS.
+  const modifierPressed = e.ctrlKey || e.metaKey;
+
   // Get the text and the formatted date.
-  let text = getSelectedText();
+  let text = normalizeTimestamp(getSelectedText());
+
+  if (
+    !text &&
+    lastTimestampSelection.text &&
+    Date.now() - lastTimestampSelection.updatedAt < 2000
+  ) {
+    text = lastTimestampSelection.text;
+  }
 
   // Fetch the date(s).
   let { textContent, fetchedIn } = await getFormattedDate(text);
 
   // If no CTRL key, no text, or no converted textContent/fetchedIn, return.
-  if (!e.ctrlKey || !text || !textContent || !fetchedIn) return;
+  if (!modifierPressed || !text || !textContent || !fetchedIn) return;
+
+  // Clear the cached selection once we've used it.
+  lastTimestampSelection = { text: '', updatedAt: 0 };
 
   // Create an element in the body.
   let div = document.createElement('div');
@@ -96,6 +115,13 @@ async function handleEvent(e) {
 (() => {
   // Add an event listener on mouseup to handle the CTRL click conversion.
   document.addEventListener('mouseup', handleEvent, false);
+  // Track the current selection so ctrl/cmd+click can use it before the click clears it.
+  document.addEventListener('selectionchange', () => {
+    const text = normalizeTimestamp(getSelectedText());
+    if (TIMESTAMP_REGEX.test(text)) {
+      lastTimestampSelection = { text, updatedAt: Date.now() };
+    }
+  }, false);
   // Add Escape key to close all open popovers.
   document.addEventListener('keydown', handleEsc, false);
 })();
