@@ -44,6 +44,13 @@ function getSelectedText() {
   return '';
 }
 
+function handleEsc(e) {
+  if (e.key === 'Escape') {
+    const nodes = document.querySelectorAll('.timepeek-base');
+    nodes.forEach(n => n.remove());
+  }
+}
+
 async function handleEvent(e) {
   // Get the text and the formatted date.
   let text = getSelectedText();
@@ -89,4 +96,6 @@ async function handleEvent(e) {
 (() => {
   // Add an event listener on mouseup to handle the CTRL click conversion.
   document.addEventListener('mouseup', handleEvent, false);
+  // Add Escape key to close all open popovers.
+  document.addEventListener('keydown', handleEsc, false);
 })();
