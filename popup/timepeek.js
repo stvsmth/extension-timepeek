@@ -2,7 +2,7 @@ dayjs.extend(window.dayjs_plugin_utc);
 dayjs.extend(window.dayjs_plugin_timezone);
 
 const DEFAULT_FORMAT = 'ddd MMM DD YYYY HH:mm:ss ZZ'
-const DEFAULT_TIMEZONES = ['America/New_York'];
+const DEFAULT_TIMEZONES = ['Etc/UTC'];
 const DEFAULT_INCLUDE_REGION = true;
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -27,15 +27,21 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Load the browser storage.
   let settings = await browser.storage.local.get();
 
-  // Get all the timezones.
-  const allTimezones = Intl.supportedValuesOf('timeZone');
+  // Chrome hides the utility Etc/UTC timezone, we need to add it if it's not present.
+  const supportedTimezones = Intl.supportedValuesOf('timeZone');
+  const hasUtc = supportedTimezones.some(tz => {
+    const lower = tz.toLowerCase();
+    return lower === 'utc' || lower === 'etc/utc';
+  });
+  const allTimezones = hasUtc ? [...supportedTimezones] : ['Etc/UTC', ...supportedTimezones];
 
   // Create a data list for the timezones.
   let dataList = document.getElementById('timezones');
   for (let i = 0; i < allTimezones.length; i++) {
     let option = document.createElement('option');
-    option.value = allTimezones[i];
-    option.text = allTimezones[i];
+    const timezone = allTimezones[i];
+    option.value = timezone;
+    option.text = timezone === 'Etc/UTC' ? 'UTC' : timezone;
     dataList.appendChild(option);
   }
 
@@ -110,7 +116,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (e.key === 'Enter' && timezonesInput.value) {
       e.preventDefault();
       const entry = timezonesInput.value.trim();
-      const matchTz = allTimezones.find(tz => tz.toLowerCase() === entry.toLowerCase());
+      const entryLower = entry.toLowerCase();
+      let matchTz = allTimezones.find(tz => tz.toLowerCase() === entryLower);
+
+      if (!matchTz && entryLower === 'utc') {
+        matchTz = allTimezones.find(tz => tz.toLowerCase() === 'etc/utc') || 'Etc/UTC';
+      }
 
       if (matchTz && !currentTzs.includes(matchTz)) {
         currentTzs.push(matchTz);

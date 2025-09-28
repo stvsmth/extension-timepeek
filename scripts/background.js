@@ -10,7 +10,7 @@ async function handleMessage(message) {
     let settings = await browser.storage.local.get(['format', 'timezones', 'includeRegion']);
 
     const format = settings.format || 'ddd MMM DD YYYY HH:mm:ss ZZ';
-    const timezones = settings.timezones && settings.timezones.length ? settings.timezones : ['America/New_York'];
+    const timezones = settings.timezones && settings.timezones.length ? settings.timezones : ['Etc/UTC'];
     const includeRegion = settings.hasOwnProperty('includeRegion') ? settings.includeRegion : true;
     const timestamp = parseFloat(message.text);
     const formatFn = (typeof globalThis !== 'undefined' && globalThis.getFormattedString) ||
