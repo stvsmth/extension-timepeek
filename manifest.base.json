@@ -4,7 +4,7 @@
   "description": "Hover over any Unix timestamp to display a human-readable date and time.",
   "homepage_url": "https://github.com/stvsmth/extension-timepeek",
   "author": "stvsmth",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "content_scripts": [
     {
       "matches": [
