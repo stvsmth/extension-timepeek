@@ -51,12 +51,17 @@ fs.mkdirSync(outDir, { recursive: true });
 
 // Copy all files except the manifest templates and dist itself
 const exclude = new Set([
+  'AGENTS.md',
   'dist',
   'node_modules',
   'manifest.base.json',
   'manifest.chrome.json',
   'manifest.firefox.json',
-  'scripts/gen-manifest.mjs'
+  'package.json',
+  'package-lock.json',
+  'rollup.config.mjs',
+  'chrome_disto.md',
+  'web-ext-artifacts'
 ]);
 
 function copyRecursive(src, dest) {
@@ -65,6 +70,8 @@ function copyRecursive(src, dest) {
     fs.mkdirSync(dest, { recursive: true });
     for (const entry of fs.readdirSync(src)) {
       if (exclude.has(entry)) continue;
+      // Skip all dotfiles and dotdirs (.git, .claude, .gitignore, etc.)
+      if (entry.startsWith('.')) continue;
       copyRecursive(path.join(src, entry), path.join(dest, entry));
     }
   } else {
