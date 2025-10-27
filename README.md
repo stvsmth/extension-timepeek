@@ -3,7 +3,7 @@
 ## Overview
 
 Timepeek is a browser extension that displays a formatted date when you select a Unix timestamp on
-a page. If the selected text is all digits, we treat it as a timestamp and convert it to a
+a web page. If the selected text is all digits, we treat it as a timestamp and convert it to a
 human‑readable date. You can control the format and choose one or more timezones.
 
 Cross‑browser: Firefox (MV2) and Chrome (MV3) are supported via per‑target manifests and a small
@@ -53,7 +53,8 @@ npm run build:chrome      # generates dist/chrome and bundles SW
 # In Chrome: Extensions → Developer mode → Load unpacked → dist/chrome
 ```
 
-Iterate by re‑running `npm run build:chrome` and clicking “Reload” on the extension in `chrome://extensions/`.
+Iterate by re‑running `npm run build:chrome` and clicking “Reload” on the extension in
+`chrome://extensions/`.
 
 ### Alternative Firefox dev (mirrors packaged layout)
 
@@ -91,7 +92,7 @@ web-ext sign \
 ```bash
 npm run build:chrome
 # Load unpacked from dist/chrome, or zip it:
-(cd dist && zip -r ../timepeek-chrome-unpacked.zip chrome)
+(cd dist && zip -r ../timepeek-chrome-unpacked.zip chrome && cd .. && mv timepeek-chrome-unpacked.zip dist/chrome)
 ```
 
 ## Cross‑browser manifest strategy
@@ -103,7 +104,8 @@ npm run build:chrome
 ## NPM scripts
 
 - `npm run build:firefox` → Generate `dist/firefox` with Manifest V2 (no bundling).
-- `npm run build:chrome` → Generate `dist/chrome`, then bundle the background service worker to `dist/chrome/scripts/background.js` with Rollup.
+- `npm run build:chrome` → Generate `dist/chrome`, then bundle the background service worker to
+   `dist/chrome/scripts/background.js` with Rollup.
 - `npm run dev:firefox` → Shortcut for `web-ext run -s dist/firefox` (generate first if needed).
 
 ## CI builds (GitHub Actions)
