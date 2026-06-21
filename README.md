@@ -11,7 +11,6 @@ build step.
 
 ## Project layout
 
-- `manifest.json` → Firefox‑focused MV2 manifest for fast local dev.
 - `manifest.base.json` → Shared fields used by both targets.
 - `manifest.firefox.json` → Firefox override (MV2, `background.scripts`).
 - `manifest.chrome.json` → Chrome override (MV3, `background.service_worker`).
@@ -30,18 +29,20 @@ build step.
 
 ## Development workflow
 
-### Quick Firefox dev loop (recommended)
+### Firefox dev loop
 
-Run against the root (MV2) manifest for fast auto‑reload on file changes:
+`dev:firefox` generates the Firefox dist (MV2) and runs it with auto‑reload:
 
 ```bash
-web-ext run
-# Optional helpers:
-#   web-ext run --start-url https://example.com
-#   web-ext run --firefox "path/to/Firefox Nightly"
+npm install               # first time only
+npm run dev:firefox       # builds dist/firefox, then runs web-ext
+# Optional web-ext flags pass through after `--`:
+#   npm run dev:firefox -- --start-url https://example.com
+#   npm run dev:firefox -- --firefox "path/to/Firefox Nightly"
 ```
 
-Edits to files under the repo root will trigger live reloads.
+`web-ext` live‑reloads on changes under `dist/firefox`. If you edit source files at
+the repo root, re‑run `npm run dev:firefox` to rebuild and relaunch.
 
 ### Chrome dev loop
 
@@ -56,43 +57,26 @@ npm run build:chrome      # generates dist/chrome and bundles SW
 Iterate by re‑running `npm run build:chrome` and clicking “Reload” on the extension in
 `chrome://extensions/`.
 
-### Alternative Firefox dev (mirrors packaged layout)
-
-Generate the Firefox dist and run from there:
-
-```bash
-npm run build:firefox
-web-ext run -s dist/firefox
-```
-
-This path mirrors the packaged output but requires re‑running `npm run build:firefox` if you change files.
-
 ## Building for distribution
 
 ### Firefox (zip via web‑ext)
 
 ```bash
-npm run build:firefox
-web-ext build -s dist/firefox -a dist
-# Produces a signed-ready zip in ./dist
+npm run pack:firefox      # builds dist/firefox, writes a zip to ./dist
 ```
 
-Signing (requires AMO credentials):
+Signing publishes to AMO and requires credentials. `web-ext` reads them from
+`WEB_EXT_API_KEY` / `WEB_EXT_API_SECRET` (or a local `.web-ext-config.mjs`):
 
 ```bash
-web-ext sign \
-  --source-dir dist/firefox \
-  --api-key "user:YOUR_ID" \
-  --api-secret "YOUR_SECRET" \
-  --channel unlisted
+npm run sign:firefox      # builds dist/firefox, then web-ext sign --channel unlisted
 ```
 
 ### Chrome (unpacked or zip)
 
 ```bash
-npm run build:chrome
-# Load unpacked from dist/chrome, or zip it:
-(cd dist && zip -r ../timepeek-chrome-unpacked.zip chrome && cd .. && mv timepeek-chrome-unpacked.zip dist/chrome)
+npm run pack:chrome       # builds dist/chrome, zips it to dist/timepeek-chrome-unpacked.zip
+# Or just load unpacked from dist/chrome in chrome://extensions/
 ```
 
 ## Cross‑browser manifest strategy
@@ -103,10 +87,16 @@ npm run build:chrome
 
 ## NPM scripts
 
+These wrap the build steps and the `web-ext` commands, so they are the source of truth for the
+exact invocations:
+
 - `npm run build:firefox` → Generate `dist/firefox` with Manifest V2 (no bundling).
 - `npm run build:chrome` → Generate `dist/chrome`, then bundle the background service worker to
    `dist/chrome/scripts/background.js` with Rollup.
-- `npm run dev:firefox` → Shortcut for `web-ext run -s dist/firefox` (generate first if needed).
+- `npm run dev:firefox` → Build `dist/firefox`, then `web-ext run` it with auto‑reload.
+- `npm run pack:firefox` → Build `dist/firefox`, then `web-ext build` a distributable zip into `dist/`.
+- `npm run pack:chrome` → Build `dist/chrome`, then zip it to `dist/timepeek-chrome-unpacked.zip`.
+- `npm run sign:firefox` → Build `dist/firefox`, then `web-ext sign` it to AMO (unlisted channel).
 
 ## CI builds (GitHub Actions)
 
@@ -124,5 +114,5 @@ Workflow: `.github/workflows/build.yml`
   output.
 - If you add new files that Chrome needs, re‑run `npm run build:chrome` so they are copied into
   `dist/chrome`.
-- For Firefox root‑manifest dev, `web-ext` auto‑reloads on changes; if you dev from `dist/firefox`,
-  regenerate before reloading.
+- Firefox dev runs from `dist/firefox`; `web-ext` auto‑reloads on changes there, but edits to
+  source files at the repo root require re‑running `npm run build:firefox`.
