@@ -90,11 +90,9 @@ function timestampToDate(n) {
   return new Date(n * 1000);                // seconds; fractional preserved
 }
 
-const globalScope = typeof globalThis !== 'undefined' ? globalThis : self;
-globalScope.getFormattedString = getFormattedString;
-globalScope.timestampToDate = timestampToDate;
+globalThis.getFormattedString = getFormattedString;
+globalThis.timestampToDate = timestampToDate;
 
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = getFormattedString;
-  module.exports.timestampToDate = timestampToDate;
+  module.exports = { getFormattedString, timestampToDate };
 }

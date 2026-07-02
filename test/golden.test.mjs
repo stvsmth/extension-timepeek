@@ -10,7 +10,7 @@ import { MATRIX } from './matrix.mjs';
 import goldens from './goldens.json' with { type: 'json' };
 
 const require = createRequire(import.meta.url);
-const fmt = require('../scripts/formatter.js');
+const { getFormattedString: fmt } = require('../scripts/formatter.js');
 
 for (const c of MATRIX) {
   test(`golden: ${c.id}`, () => {

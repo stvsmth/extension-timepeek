@@ -20,13 +20,12 @@ function getSelectedText() {
   return selection ? selection.toString().trim() : '';
 }
 
-// Former main.css rules. Injected into each tooltip's shadow root so
-// aggressive page CSS (resets, high z-indexes) can't break or bury it.
+// Injected into each tooltip's shadow root so aggressive page CSS (resets,
+// high z-indexes) can't break or bury it. The host carries the fixed
+// positioning; .timepeek-base is only the close icon's anchor.
 const TOOLTIP_CSS = `
 .timepeek-base {
-    width: auto;
-    position: fixed;
-    z-index: 99999;
+    position: relative;
     background: black;
     min-height: 35px;
     padding: 5px 10px;
@@ -90,11 +89,11 @@ function showTooltip(textContent, x, y) {
 
   // Clamp to viewport: measure, then pull left of the right edge and flip
   // above the cursor if the bottom would overflow.
-  const rect = div.getBoundingClientRect();
+  const rect = host.getBoundingClientRect();
   const left = Math.min(x, window.innerWidth - rect.width - 8);
   const top = (y + 30 + rect.height > window.innerHeight) ? y - rect.height - 8 : y + 30;
-  div.style.left = `${Math.max(left, 0)}px`;
-  div.style.top = `${Math.max(top, 0)}px`;
+  host.style.left = `${Math.max(left, 0)}px`;
+  host.style.top = `${Math.max(top, 0)}px`;
 }
 
 async function handleEvent(e) {

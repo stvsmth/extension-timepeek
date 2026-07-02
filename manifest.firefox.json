@@ -1,7 +1,7 @@
 {
   "host_permissions": ["<all_urls>"],
   "background": {
-    "scripts": ["scripts/formatter.js", "scripts/background.js"]
+    "scripts": ["scripts/formatter.js", "scripts/settings.js", "scripts/background.js"]
   },
   "browser_specific_settings": {
     "gecko": {

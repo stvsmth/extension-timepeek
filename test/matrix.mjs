@@ -1,5 +1,7 @@
-// Shared case table for golden generation (test/gen-goldens.mjs) and golden
-// assertions (test/golden.test.mjs). All timestamps are historical/fixed so
+// Case table for the golden assertions in test/golden.test.mjs. The one-shot
+// generator that produced test/goldens.json from the (since-removed) vendored
+// Day.js is gone; goldens.json is the frozen contract and is never edited by
+// hand. All timestamps are historical/fixed so
 // TZDB updates can't silently flip an expected value. Do not add cases whose
 // expected output depends on the *host machine's* default timezone — see the
 // DST cases below, which are deliberately placed a few hours away from the

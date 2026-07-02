@@ -45,39 +45,37 @@ merged.version = readJson(path.join(root, 'package.json')).version;
 fs.rmSync(outDir, { recursive: true, force: true });
 fs.mkdirSync(outDir, { recursive: true });
 
-// Copy all files except the manifest templates and dist itself
-const exclude = new Set([
-  'AGENTS.md',
-  'dist',
-  'node_modules',
-  'manifest.base.json',
-  'manifest.chrome.json',
-  'manifest.firefox.json',
-  'package.json',
-  'package-lock.json',
-  'chrome_disto.md',
-  'web-ext-artifacts',
-  'test',
-  'review-proj-fable.md',
-  'gen-manifest.mjs'
-]);
+// Allowlist of what actually ships. A new file that should ship shows up as
+// visibly missing on first manual test; a stray repo file can never leak
+// into a store submission.
+const include = [
+  'icons',
+  'popup',
+  'scripts/background.js',
+  'scripts/content.js',
+  'scripts/formatter.js',
+  'scripts/settings.js',
+  'LICENSE',
+];
 
 function copyRecursive(src, dest) {
   const stat = fs.statSync(src);
   if (stat.isDirectory()) {
     fs.mkdirSync(dest, { recursive: true });
     for (const entry of fs.readdirSync(src)) {
-      if (exclude.has(entry)) continue;
-      // Skip all dotfiles and dotdirs (.git, .claude, .gitignore, etc.)
+      // Skip dotfiles within shipped dirs (.DS_Store and friends)
       if (entry.startsWith('.')) continue;
       copyRecursive(path.join(src, entry), path.join(dest, entry));
     }
   } else {
+    fs.mkdirSync(path.dirname(dest), { recursive: true });
     fs.copyFileSync(src, dest);
   }
 }
 
-copyRecursive(root, outDir);
+for (const entry of include) {
+  copyRecursive(path.join(root, entry), path.join(outDir, entry));
+}
 
 // Write the generated manifest over any copied manifest.json
 const outManifest = path.join(outDir, 'manifest.json');

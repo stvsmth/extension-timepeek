@@ -1,19 +1,14 @@
 // New-behavior unit tests for scripts/formatter.js - no goldens involved.
-// These exercise functionality (timestampToDate, the intentional Y/YYY
-// pass-through divergence, DTF caching) that only exists after the Phase 2
-// Day.js -> Intl rewrite. Before that lands, scripts/formatter.js has no
-// `timestampToDate` export, so the whole file is skipped rather than failing
-// the Phase 0/1 checkpoints - it self-activates once Phase 2 ships.
+// These exercise timestampToDate, the intentional Y/YYY pass-through
+// divergence from Day.js, and DTF caching.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const mod = require('../scripts/formatter.js');
-const hasNewImpl = typeof mod.timestampToDate === 'function';
+const { getFormattedString, timestampToDate } = require('../scripts/formatter.js');
 
-test('timestampToDate: seconds/ms/microseconds boundaries', { skip: !hasNewImpl }, () => {
-  const { timestampToDate } = mod;
+test('timestampToDate: seconds/ms/microseconds boundaries', () => {
   // Just under the ms boundary -> treated as seconds.
   assert.equal(timestampToDate(1e12 - 1).getTime(), (1e12 - 1) * 1000);
   // At the ms boundary -> treated as milliseconds.
@@ -29,24 +24,21 @@ test('timestampToDate: seconds/ms/microseconds boundaries', { skip: !hasNewImpl 
   assert.equal(timestampToDate(ms).getTime(), timestampToDate(us).getTime());
 });
 
-test('timestampToDate: non-finite input produces an Invalid Date', { skip: !hasNewImpl }, () => {
-  const { timestampToDate } = mod;
+test('timestampToDate: non-finite input produces an Invalid Date', () => {
   assert.ok(Number.isNaN(timestampToDate(NaN).getTime()));
   assert.ok(Number.isNaN(timestampToDate(Infinity).getTime()));
   assert.ok(Number.isNaN(timestampToDate(-Infinity).getTime()));
 });
 
-test('bare Y/YYY tokens pass through verbatim (documented Day.js divergence)', { skip: !hasNewImpl }, () => {
+test('bare Y/YYY tokens pass through verbatim (documented Day.js divergence)', () => {
   // Day.js renders bare Y/YYY as the UTC offset (a bug) - intentionally not
   // replicated. The new formatter has no Y/YYY entries in its token
   // alternation, so those letters are left untouched in the output.
-  const getFormattedString = mod;
   const out = getFormattedString(new Date(1700000000 * 1000), 'America/New_York', 'Y YYY', false);
   assert.equal(out, 'Y YYY');
 });
 
-test('DTF instances are cached per timezone', { skip: !hasNewImpl }, () => {
-  const getFormattedString = mod;
+test('DTF instances are cached per timezone', () => {
   const OriginalDTF = Intl.DateTimeFormat;
   let constructions = 0;
   class CountingDTF extends OriginalDTF {

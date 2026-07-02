@@ -9,6 +9,7 @@
     </head>
     <body>
         <script src="../scripts/formatter.js"></script>
+        <script src="../scripts/settings.js"></script>
         <script src="timepeek.js"></script>
         <div class="container">
             <div class="border"></div>
@@ -42,12 +43,13 @@
                           <input
                               type="text"
                               id="timepeek-format"
+                              title="Supported tokens: YYYY YY MMMM MMM MM M DD D dddd ddd dd d HH H hh h mm m ss s SSS A a Z ZZ — wrap literal text in [brackets]"
                           />
                           <a
                               target="_blank"
                               href="https://day.js.org/docs/en/display/format"
                           >
-                             Day.js Format Docs
+                             Day.js Format Docs (supported subset in tooltip)
                           </a>
                       </div>
                       <div class="timezones w100">

@@ -17,7 +17,8 @@ formatting dates with native `Intl.DateTimeFormat`.
 - `manifest.firefox.json` → Firefox override (`background.scripts` event page, `host_permissions`,
   Gecko id).
 - `manifest.chrome.json` → Chrome override (`background.service_worker`).
-- `scripts/` → Extension code: `background.js`, `content.js`, `formatter.js`, and
+- `scripts/` → Extension code: `background.js`, `content.js`, `formatter.js`,
+  `settings.js` (shared settings access for popup + background), and
   `gen-manifest.mjs` (the build tool).
 - `popup/` → Options UI assets.
 - `icons/` → Extension icons.

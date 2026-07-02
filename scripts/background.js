@@ -1,41 +1,27 @@
-// Chrome MV3 classic service worker pulls the formatter in via importScripts,
-// which must run during initial synchronous evaluation. Firefox MV3 event
-// pages have no importScripts; there formatter.js loads first via the
-// manifest background.scripts array.
+// Chrome MV3 classic service worker pulls its dependencies in via
+// importScripts, which must run during initial synchronous evaluation.
+// Firefox MV3 event pages have no importScripts; there formatter.js and
+// settings.js load first via the manifest background.scripts array.
 if (typeof importScripts === 'function') {
-  importScripts('./formatter.js');
+  importScripts('./formatter.js', './settings.js');
 }
 
-const api = globalThis.browser ?? globalThis.chrome;
-
-const DEFAULT_SETTINGS = {
-  format: 'ddd MMM DD YYYY HH:mm:ss ZZ',
-  timezones: ['Etc/UTC'],
-  includeRegion: true,
-};
-
-// Reads storage.sync, migrating pre-1.8 storage.local settings once.
-// (Duplicated in popup/timepeek.js — no shared module pathway without a build step.)
-async function getSettings() {
-  let s = await api.storage.sync.get(['format', 'timezones', 'includeRegion']);
-  if (Object.keys(s).length === 0) {
-    const local = await api.storage.local.get(['format', 'timezones', 'includeRegion']);
-    if (Object.keys(local).length) {
-      await api.storage.sync.set(local);
-      s = local;
-    }
-  }
-  return { ...DEFAULT_SETTINGS, ...s };
-}
+// One-time pre-1.8 migration: settings used to live in storage.local.
+// Runs at install/update so per-message reads stay a single sync.get.
+api.runtime.onInstalled.addListener(async () => {
+  const sync = await api.storage.sync.get(['format', 'timezones', 'includeRegion']);
+  if (Object.keys(sync).length) return;
+  const local = await api.storage.local.get(['format', 'timezones', 'includeRegion']);
+  if (Object.keys(local).length) await api.storage.sync.set(local);
+});
 
 async function handleMessage(message) {
   if (message.action !== 'formatDate' || !message.text) return { textContent: null };
   const settings = await getSettings();
-  const timezones = settings.timezones.length ? settings.timezones : DEFAULT_SETTINGS.timezones;
   const date = timestampToDate(parseFloat(message.text));
   try {
-    const textContent = timezones
-      .map(tz => getFormattedString(date, tz, settings.format || DEFAULT_SETTINGS.format, settings.includeRegion))
+    const textContent = settings.timezones
+      .map(tz => getFormattedString(date, tz, settings.format, settings.includeRegion))
       .join('\n');
     return { textContent };
   } catch {

@@ -1,37 +1,13 @@
-const api = globalThis.browser ?? globalThis.chrome;
-
-const DEFAULT_FORMAT = 'ddd MMM DD YYYY HH:mm:ss ZZ'
-const DEFAULT_TIMEZONES = ['Etc/UTC'];
-const DEFAULT_INCLUDE_REGION = true;
-const DEFAULT_SETTINGS = {
-  format: DEFAULT_FORMAT,
-  timezones: DEFAULT_TIMEZONES,
-  includeRegion: DEFAULT_INCLUDE_REGION,
-};
-
-// Reads storage.sync, migrating pre-1.8 storage.local settings once.
-// (Duplicated in scripts/background.js — no shared module pathway without a build step.)
-async function getSettings() {
-  let s = await api.storage.sync.get(['format', 'timezones', 'includeRegion']);
-  if (Object.keys(s).length === 0) {
-    const local = await api.storage.local.get(['format', 'timezones', 'includeRegion']);
-    if (Object.keys(local).length) {
-      await api.storage.sync.set(local);
-      s = local;
-    }
-  }
-  return { ...DEFAULT_SETTINGS, ...s };
-}
+// api, DEFAULT_SETTINGS, and getSettings come from ../scripts/settings.js,
+// loaded before this file in timepeek.html.
 
 document.addEventListener('DOMContentLoaded', async () => {
+  // Start the storage read while the DOM work below runs.
+  const settingsPromise = getSettings();
+
   // Display version from manifest
   const manifest = api.runtime.getManifest();
   document.getElementById('version').textContent = 'v' + manifest.version;
-
-  // Load settings, with defaults applied for any missing keys. This returns
-  // the defaults without writing anything for a fresh install - the
-  // background already applies its own fallbacks too.
-  let settings = await getSettings();
 
   // Chrome hides the utility Etc/UTC timezone, we need to add it if it's not present.
   const supportedTimezones = Intl.supportedValuesOf('timeZone');
@@ -51,23 +27,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     dataList.appendChild(option);
   }
 
+  // getSettings() returns normalized values, so no per-field fallbacks here.
+  const settings = await settingsPromise;
+
   // Set the input for format.
   let formatInput = document.getElementById('timepeek-format');
-  formatInput.value = settings.format || DEFAULT_FORMAT;
+  formatInput.value = settings.format;
 
   // Include region checkbox
   const includeRegionCheckbox = document.getElementById('timepeek-include-region');
-  includeRegionCheckbox.checked = settings.hasOwnProperty('includeRegion') ? settings.includeRegion : DEFAULT_INCLUDE_REGION;
+  includeRegionCheckbox.checked = settings.includeRegion;
 
   // Timezones management
   const timezonesContainer = document.getElementById('timezones-container');
   const timezonesInput = document.getElementById('timepeek-timezones-input');
   const previewFormat = document.getElementById('timepeek-preview');
-  let currentTzs = settings.timezones;
+  let currentTzs = [...settings.timezones]; // copy: never mutate the shared cache
 
   const updatePreview = () => {
-    const format = formatInput.value || DEFAULT_FORMAT;
-    const tz = currentTzs[0] ?? 'Etc/UTC'; // shared fallback with the background
+    // Runtime fallbacks for live-emptied inputs (cleared format field,
+    // all timezone tags removed) — matches what the background would use.
+    const format = formatInput.value || DEFAULT_SETTINGS.format;
+    const tz = currentTzs[0] ?? DEFAULT_SETTINGS.timezones[0];
     previewFormat.value = getFormattedString(new Date(), tz, format, includeRegionCheckbox.checked);
   };
 
@@ -102,14 +83,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     updatePreview();
   };
 
-  // Set the event listener for the format input
-  formatInput.addEventListener('input', async () => {
-    if (formatInput.value) {
-      await api.storage.sync.set({ format: formatInput.value });
-    } else {
-      await api.storage.sync.remove('format');
-    }
+  // Format input: preview updates per keystroke, but the storage.sync write
+  // is debounced (Chrome quotas sync writes per minute) and flushed on blur.
+  const saveFormat = () => formatInput.value
+    ? api.storage.sync.set({ format: formatInput.value })
+    : api.storage.sync.remove('format');
+  let formatSaveTimer;
+  formatInput.addEventListener('input', () => {
     updatePreview();
+    clearTimeout(formatSaveTimer);
+    formatSaveTimer = setTimeout(saveFormat, 300);
+  });
+  formatInput.addEventListener('change', () => {
+    clearTimeout(formatSaveTimer);
+    saveFormat();
   });
 
   // Set the event listener for the include region checkbox
