@@ -1,31 +1,37 @@
-dayjs.extend(window.dayjs_plugin_utc);
-dayjs.extend(window.dayjs_plugin_timezone);
+const api = globalThis.browser ?? globalThis.chrome;
 
 const DEFAULT_FORMAT = 'ddd MMM DD YYYY HH:mm:ss ZZ'
 const DEFAULT_TIMEZONES = ['Etc/UTC'];
 const DEFAULT_INCLUDE_REGION = true;
+const DEFAULT_SETTINGS = {
+  format: DEFAULT_FORMAT,
+  timezones: DEFAULT_TIMEZONES,
+  includeRegion: DEFAULT_INCLUDE_REGION,
+};
+
+// Reads storage.sync, migrating pre-1.8 storage.local settings once.
+// (Duplicated in scripts/background.js — no shared module pathway without a build step.)
+async function getSettings() {
+  let s = await api.storage.sync.get(['format', 'timezones', 'includeRegion']);
+  if (Object.keys(s).length === 0) {
+    const local = await api.storage.local.get(['format', 'timezones', 'includeRegion']);
+    if (Object.keys(local).length) {
+      await api.storage.sync.set(local);
+      s = local;
+    }
+  }
+  return { ...DEFAULT_SETTINGS, ...s };
+}
 
 document.addEventListener('DOMContentLoaded', async () => {
   // Display version from manifest
-  const manifest = browser.runtime.getManifest();
+  const manifest = api.runtime.getManifest();
   document.getElementById('version').textContent = 'v' + manifest.version;
 
-  // Set default settings if they do not exist.
-  let format = await browser.storage.local.get('format');
-  if (!Object.keys(format).length) {
-    await browser.storage.local.set({ format: DEFAULT_FORMAT });
-  }
-  let timezones = await browser.storage.local.get('timezones');
-  if (!Object.keys(timezones).length) {
-    await browser.storage.local.set({ timezones: DEFAULT_TIMEZONES });
-  }
-  let includeRegionSetting = await browser.storage.local.get('includeRegion');
-  if (!Object.keys(includeRegionSetting).length) {
-    await browser.storage.local.set({ includeRegion: DEFAULT_INCLUDE_REGION });
-  }
-
-  // Load the browser storage.
-  let settings = await browser.storage.local.get();
+  // Load settings, with defaults applied for any missing keys. This returns
+  // the defaults without writing anything for a fresh install - the
+  // background already applies its own fallbacks too.
+  let settings = await getSettings();
 
   // Chrome hides the utility Etc/UTC timezone, we need to add it if it's not present.
   const supportedTimezones = Intl.supportedValuesOf('timeZone');
@@ -47,14 +53,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Set the input for format.
   let formatInput = document.getElementById('timepeek-format');
-  if (settings.hasOwnProperty('format') && settings.format) {
-    formatInput.value = settings.format;
-  }
+  formatInput.value = settings.format || DEFAULT_FORMAT;
 
   // Include region checkbox
   const includeRegionCheckbox = document.getElementById('timepeek-include-region');
-  const includeRegion = settings.hasOwnProperty('includeRegion') ? settings.includeRegion : DEFAULT_INCLUDE_REGION;
-  includeRegionCheckbox.checked = includeRegion;
+  includeRegionCheckbox.checked = settings.hasOwnProperty('includeRegion') ? settings.includeRegion : DEFAULT_INCLUDE_REGION;
 
   // Timezones management
   const timezonesContainer = document.getElementById('timezones-container');
@@ -64,8 +67,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const updatePreview = () => {
     const format = formatInput.value || DEFAULT_FORMAT;
-    const tz = currentTzs[0]; // defaults to system TZ if undefined
-    previewFormat.value = getFormattedString(dayjs(), tz, format, includeRegionCheckbox.checked);
+    const tz = currentTzs[0] ?? 'Etc/UTC'; // shared fallback with the background
+    previewFormat.value = getFormattedString(new Date(), tz, format, includeRegionCheckbox.checked);
   };
 
   const createTag = (timezone) => {
@@ -80,7 +83,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     removeBtn.addEventListener('click', async () => {
       currentTzs = currentTzs.filter(t => t !== timezone);
-      await browser.storage.local.set({ timezones: currentTzs });
+      await api.storage.sync.set({ timezones: currentTzs });
       renderTags();
     });
 
@@ -101,13 +104,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Set the event listener for the format input
   formatInput.addEventListener('input', async () => {
-    await browser.storage.local.set({ format: formatInput.value || null });
+    if (formatInput.value) {
+      await api.storage.sync.set({ format: formatInput.value });
+    } else {
+      await api.storage.sync.remove('format');
+    }
     updatePreview();
   });
 
   // Set the event listener for the include region checkbox
   includeRegionCheckbox.addEventListener('change', async () => {
-    await browser.storage.local.set({ includeRegion: includeRegionCheckbox.checked });
+    await api.storage.sync.set({ includeRegion: includeRegionCheckbox.checked });
     updatePreview();
   });
 
@@ -125,7 +132,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       if (matchTz && !currentTzs.includes(matchTz)) {
         currentTzs.push(matchTz);
-        await browser.storage.local.set({ timezones: currentTzs });
+        await api.storage.sync.set({ timezones: currentTzs });
         renderTags();
       }
       timezonesInput.value = '';
@@ -133,6 +140,23 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   renderTags();
+
+  // Firefox MV3 host permissions are opt-in; without a granted <all_urls>
+  // the content script silently never injects. Harmless no-op on Chrome,
+  // where the manifest grant is automatic.
+  const grantBtn = document.getElementById('timepeek-grant');
+  if (api.permissions?.contains) {
+    const granted = await api.permissions.contains({ origins: ['<all_urls>'] });
+    if (!granted) {
+      grantBtn.classList.remove('dn');
+      grantBtn.addEventListener('click', async () => {
+        // permissions.request must run in a user gesture; this click qualifies.
+        if (await api.permissions.request({ origins: ['<all_urls>'] })) {
+          grantBtn.classList.add('dn');
+        }
+      });
+    }
+  }
 
   // Set the loading to false (add dn to loading, remove dn from content).
   let loading = document.querySelector('.loading');

@@ -19,13 +19,19 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
-      - name: Build Firefox (MV2)
+      - name: Run tests
+        run: npm test
+
+      - name: Build Firefox (MV3)
         run: npm run build:firefox
 
       - name: Build Chrome (MV3)
         run: npm run build:chrome
+
+      - name: Lint Firefox build
+        run: npx --yes web-ext lint -s dist/firefox
 
       - name: Package artifacts
         run: |

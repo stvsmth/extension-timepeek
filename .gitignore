@@ -1,5 +1,5 @@
 .amo*
-.web-ext-*
+.web-ext*
 *.sh
 
 dist/

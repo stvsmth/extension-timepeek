@@ -1,0 +1,19 @@
+{
+  "default-format-utc-region-on": "Tue Nov 14 2023 22:13:20 +0000 - UTC",
+  "default-format-utc-region-off": "Tue Nov 14 2023 22:13:20 +0000",
+  "kitchen-sink-ny": "2023-23 November Nov 11 11 Tuesday Tue Tu 2 14 14 17 17 05 5 13 13 20 20 000 -0500 -05:00 PM pm - New York",
+  "negative-ts": "1938-04-24 18:13:20 -0400 - New York",
+  "dst-spring-before": "2023-03-12 01:00:00 -0500",
+  "dst-spring-after": "2023-03-12 06:00:00 -0400",
+  "dst-fall-before": "2023-11-04 22:00:00 -0400",
+  "dst-fall-after": "2023-11-05 03:00:00 -0500",
+  "tz-kolkata": "2023-11-15 03:43:20 +0530 - Kolkata",
+  "tz-kathmandu": "2023-11-15 03:58:20 +0545 - Kathmandu",
+  "tz-sydney": "2023-11-15 09:13:20 +1100 - Sydney",
+  "midnight-h23": "00 12 AM am",
+  "noon-h23": "12 12 PM pm",
+  "escaped-literal": "08:00 at am",
+  "unescaped-literal-quirk": "08:00 amt am",
+  "fractional-seconds": "22:13:20.123",
+  "multiword-region": "2023-11-14 - Buenos Aires"
+}

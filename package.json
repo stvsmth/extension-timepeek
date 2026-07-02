@@ -1,17 +1,16 @@
 {
   "name": "extension-timepeek",
   "private": true,
-  "version": "1.7.1",
+  "version": "1.8.0",
   "scripts": {
+    "test": "node --test \"test/**/*.test.mjs\"",
     "build:firefox": "node scripts/gen-manifest.mjs firefox",
-    "build:chrome": "node scripts/gen-manifest.mjs chrome && rollup -c",
+    "build:chrome": "node scripts/gen-manifest.mjs chrome",
     "dev:firefox": "npm run build:firefox && web-ext run -s dist/firefox",
     "pack:firefox": "npm run build:firefox && web-ext build -s dist/firefox -a dist --overwrite-dest",
     "pack:chrome": "npm run build:chrome && rm -f dist/timepeek-chrome-unpacked.zip && (cd dist && zip -r timepeek-chrome-unpacked.zip chrome)",
     "sign:firefox": "npm run build:firefox && web-ext sign --source-dir dist/firefox --channel unlisted"
   },
-  "devDependencies": {
-    "rollup": "^4.22.0"
-  }
+  "devDependencies": {}
 }
 

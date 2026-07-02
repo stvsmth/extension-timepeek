@@ -38,12 +38,8 @@ const override = readJson(overridePath);
 // Merge with override taking precedence (especially for background/action/permissions)
 const merged = deepMerge(base, override);
 
-// Ensure background is exactly as override wants
-if (override.background) merged.background = override.background;
-
-// Ensure action/browser_action is exactly as override wants
-if (override.action) merged.action = override.action;
-if (override.browser_action) merged.browser_action = override.browser_action;
+// Single source of truth for version: package.json, not the manifest.
+merged.version = readJson(path.join(root, 'package.json')).version;
 
 // Prepare dist/<target>
 fs.rmSync(outDir, { recursive: true, force: true });
@@ -59,9 +55,11 @@ const exclude = new Set([
   'manifest.firefox.json',
   'package.json',
   'package-lock.json',
-  'rollup.config.mjs',
   'chrome_disto.md',
-  'web-ext-artifacts'
+  'web-ext-artifacts',
+  'test',
+  'review-proj-fable.md',
+  'gen-manifest.mjs'
 ]);
 
 function copyRecursive(src, dest) {

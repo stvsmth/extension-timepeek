@@ -1,30 +1,15 @@
 {
-  "manifest_version": 2,
-  "permissions": [
-    "activeTab",
-    "http://*/",
-    "https://*/",
-    "storage"
-  ],
+  "host_permissions": ["<all_urls>"],
   "background": {
-    "scripts": [
-      "vendor/browser-polyfill.min.js",
-      "vendor/dayjs.js",
-      "vendor/utc.js",
-      "vendor/timezone.js",
-      "scripts/formatter.js",
-      "scripts/background.js"
-    ]
-  },
-  "browser_action": {
-    "default_icon": "icons/timepeek-48.png",
-    "default_popup": "popup/timepeek.html",
-    "default_title": "Timepeek"
+    "scripts": ["scripts/formatter.js", "scripts/background.js"]
   },
   "browser_specific_settings": {
     "gecko": {
-      "id": "{ed14e330-6c75-483f-8ddc-72987c4a5162}"
+      "id": "{ed14e330-6c75-483f-8ddc-72987c4a5162}",
+      "strict_min_version": "142.0",
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
     }
   }
 }
-
